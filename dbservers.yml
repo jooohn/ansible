@@ -1,0 +1,6 @@
+---
+- hosts: dbservers
+  sudo: yes
+  roles:
+    - { role: common, tags: common }
+    - { role: postgresql_server, tags: postgresql_server }

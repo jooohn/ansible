@@ -1,0 +1,6 @@
+---
+- name: be sure postgresql is installed
+  apt: name={{ item }} state=installed
+  with_items:
+    - postgresql
+    - postgresql-contrib

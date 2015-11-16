@@ -1,0 +1,4 @@
+---
+- name: be sure apt repository is updated
+  apt: update_cache=yes
+  sudo: yes

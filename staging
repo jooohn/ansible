@@ -1,0 +1,5 @@
+[webservers]
+vm.me
+
+[dbservers]
+vm.me

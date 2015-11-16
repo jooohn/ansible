@@ -1,0 +1,7 @@
+---
+- hosts: webservers
+  sudo: yes
+  roles:
+    - { role: common, tags: common }
+    - { role: ruby, tags: ruby }
+    - { role: postgresql_client, tags: postgresql_client }

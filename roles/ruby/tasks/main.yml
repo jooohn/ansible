@@ -1,0 +1,56 @@
+---
+- name: be sure dependent packages are installed
+  apt: name={{ item }} state=installed
+  with_items:
+    - libssl-dev
+    - libreadline-dev
+    - zlib1g-dev
+
+- name: has rbenv already been cloned?
+  stat: path={{ rbenv_root }}
+  register: has_rbenv
+
+- name: be sure rbenv is cloned
+  git: repo=https://github.com/sstephenson/rbenv.git dest={{ rbenv_root }}
+  when: not has_rbenv.stat.exists
+
+- name: has ruby-build already been cloned?
+  stat: path={{ rbenv_root }}/plugins/ruby-build
+  register: has_ruby_build
+
+- name: be sure ruby-build is cloned
+  git: repo=https://github.com/sstephenson/ruby-build.git dest={{ rbenv_root }}/plugins/ruby-build
+  when: not has_ruby_build.stat.exists
+
+- name: ruby-build has already been installed?
+  command: bash -lc "rbenv commands | grep -q install"
+  register: ruby_build_installed
+  failed_when: ruby_build_installed.rc not in [0, 1]
+
+- name: be sure ruby-build is installed
+  command: bash -lc "{{ rbenv_root }}/plugins/ruby-build/install.sh"
+  when: ruby_build_installed|failed
+
+- name: be sure profile for rbenv is set
+  template: src=rbenv.sh.j2 dest=/etc/profile.d/rbenv.sh mode=0644
+
+- name: ruby has already been installed?
+  command: bash -lc "rbenv versions | grep -q {{ ruby_version }}"
+  register: ruby_installed
+  failed_when: ruby_installed.rc not in [0, 1]
+
+- name: be sure ruby is installed
+  command: bash -lc "CONFIGURE_OPTS='--disable-install-rdoc' rbenv install {{ ruby_version }}"
+  when: ruby_installed|failed
+
+- name: be sure ruby version has been set
+  command: bash -lc "rbenv global {{ ruby_version }}"
+
+- name: has bundler already been installed?
+  command: bash -lc "gem list | grep -q -e '^bundler\s'"
+  register: bundler_installed
+  failed_when: bundler_installed.rc not in [0, 1]
+
+- name: be sure bundler bundler is installed
+  command: bash -lc "gem install bundler"
+  when: bundler_installed|failed
